@@ -1,0 +1,4 @@
+# Ensure bash scripts always use LF line endings in the repo
+scripts/*.sh text eol=lf
+packaging/systemd/* text eol=lf
+config/*.template text eol=lf

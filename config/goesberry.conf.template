@@ -1,0 +1,43 @@
+# ============================================================
+#  GoesBerry Boot Configuration
+#  Location: /boot/goesberry.conf  (FAT32 partition, editable on any OS)
+#
+#  Edit this file before first boot, then power on your Pi 5.
+#  The firstboot service reads it once and generates /etc/goesberry/*.
+# ============================================================
+
+# ── SDR / RF parameters ──────────────────────────────────────────────────
+
+# Centre frequency of your GOES HRIT downlink receiver chain (Hz).
+# Common values:
+#   GOES-16/18 HRIT direct:  1694100000
+# Adjust if you use a frequency-shifting LNA or dish offset.
+CENTER_FREQUENCY_HZ=1694100000
+
+# RTL-SDR sample rate (Hz).  2.4 Msps is standard for HRIT.
+SAMPLE_RATE=2400000
+
+# Frequency correction in PPM.  Run "rtl_test -p" to calibrate.
+RTL_PPM=0
+
+# RF gain in dB.  Leave empty to let the driver use AGC.
+# Typical working range with LNA+SAW: 30–49 dB.
+# Example:  RTL_GAIN=40
+RTL_GAIN=
+
+# ── Data paths ───────────────────────────────────────────────────────────
+
+# Root directory.  Use your SSD mount point.
+# Must exist (or be auto-created by firstboot) with enough free space.
+DATA_ROOT=/mnt/goesberry
+
+# ── Web UI ───────────────────────────────────────────────────────────────
+
+# TCP port for the GoesBerry web server.
+WEB_PORT=8080
+
+# ── Retention ────────────────────────────────────────────────────────────
+
+# Number of days to keep product images and cached GIFs.
+# Older files are deleted by the daily cleanup timer.
+RETENTION_DAYS=14

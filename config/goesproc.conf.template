@@ -1,0 +1,42 @@
+# goesproc.conf — generated from this template by firstboot.sh via envsubst
+# Variables replaced: ${PRODUCTS_DIR}
+#
+# Note: {time:...} tokens below are goesproc format strings — NOT shell variables.
+# Add or remove [[handler]] blocks to suit which products you want to capture.
+
+# ── GOES-16 Full-Disk CH13 (10.35 µm IR) ─────────────────────────────────
+[[handler]]
+type = "image"
+origin = "GOES-16"
+region = { type = "full_disk" }
+channel = { name = "CH13" }
+directory = "${PRODUCTS_DIR}/GOES-16/{time:%Y/%m/%d}"
+filename = "GOES16_FD_CH13_{time:%Y%m%dT%H%M%SZ}"
+format = "png"
+
+# ── GOES-18 Full-Disk CH13 ────────────────────────────────────────────────
+[[handler]]
+type = "image"
+origin = "GOES-18"
+region = { type = "full_disk" }
+channel = { name = "CH13" }
+directory = "${PRODUCTS_DIR}/GOES-18/{time:%Y/%m/%d}"
+filename = "GOES18_FD_CH13_{time:%Y%m%dT%H%M%SZ}"
+format = "png"
+
+# ── GOES-16 CONUS CH02 (Visible) ─────────────────────────────────────────
+[[handler]]
+type = "image"
+origin = "GOES-16"
+region = { type = "conus" }
+channel = { name = "CH02" }
+directory = "${PRODUCTS_DIR}/GOES-16/{time:%Y/%m/%d}"
+filename = "GOES16_CONUS_CH02_{time:%Y%m%dT%H%M%SZ}"
+format = "png"
+
+# ── Text products (uncomment to enable) ──────────────────────────────────
+# [[handler]]
+# type = "text"
+# origin = "NWS"
+# directory = "${PRODUCTS_DIR}/NWS/{time:%Y/%m/%d}"
+# filename = "{time:%Y%m%dT%H%M%SZ}"

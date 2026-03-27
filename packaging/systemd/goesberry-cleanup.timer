@@ -1,0 +1,11 @@
+[Unit]
+Description=GoesBerry Daily Cleanup Timer
+Documentation=https://github.com/funk222/GoesBerry
+
+[Timer]
+# Run once per day; catch up if the system was off
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

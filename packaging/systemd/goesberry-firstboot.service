@@ -1,0 +1,17 @@
+[Unit]
+Description=GoesBerry First-Boot Setup
+Documentation=https://github.com/funk222/GoesBerry
+After=local-fs.target
+# Only run once — skip if already configured
+ConditionPathExists=!/etc/goesberry/.configured
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/goesberry-firstboot.sh
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=goesberry-firstboot
+
+[Install]
+WantedBy=multi-user.target

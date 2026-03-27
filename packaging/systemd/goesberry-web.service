@@ -1,0 +1,18 @@
+[Unit]
+Description=GoesBerry Web Server (Node/Express)
+Documentation=https://github.com/funk222/GoesBerry
+After=network.target goesberry-firstboot.service
+Wants=goesberry-firstboot.service
+
+[Service]
+EnvironmentFile=/etc/goesberry/runtime.env
+WorkingDirectory=/opt/goesberry/web/backend
+ExecStart=/usr/bin/node /opt/goesberry/web/backend/server.js
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=goesberry-web
+
+[Install]
+WantedBy=multi-user.target

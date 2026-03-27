@@ -1,0 +1,17 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Vite build output
+web/frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime / secrets
+/etc/goesberry/
+*.env.local
+
+# Logs
+*.log

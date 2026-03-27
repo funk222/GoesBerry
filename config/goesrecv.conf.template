@@ -1,0 +1,20 @@
+# goesrecv.conf — generated from this template by firstboot.sh via envsubst
+# Variables replaced: ${CENTER_FREQUENCY_HZ}, ${SAMPLE_RATE}, ${RTL_GAIN}, ${RTL_PPM}
+
+[demodulator]
+mode = "hrit"
+
+[rtlsdr]
+frequency = ${CENTER_FREQUENCY_HZ}
+sample_rate = ${SAMPLE_RATE}
+gain = ${RTL_GAIN}
+ppm = ${RTL_PPM}
+bias = false
+
+[monitor]
+# Publishes health/lock stats on UDP port 5004
+bind = "0.0.0.0:5004"
+
+[packet_publisher]
+# goesproc subscribes to this TCP port
+bind = "0.0.0.0:5005"

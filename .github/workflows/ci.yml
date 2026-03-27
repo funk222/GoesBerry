@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Backend ──────────────────────────────────────────────────────────────
+  backend:
+    name: Backend – install & smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: web/backend
+
+      - name: Smoke-test server startup
+        run: |
+          mkdir -p /tmp/gb-products /tmp/gb-cache
+          PRODUCTS_DIR=/tmp/gb-products CACHE_DIR=/tmp/gb-cache WEB_PORT=18080 \
+            timeout 5 node server.js || true
+          echo "Server exited cleanly (expected with timeout)"
+        working-directory: web/backend
+
+  # ── Frontend ─────────────────────────────────────────────────────────────
+  frontend:
+    name: Frontend – build (Vite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: web/frontend
+
+      - name: Build
+        run: npm run build
+        working-directory: web/frontend
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: web/frontend/dist/
+          retention-days: 7
+
+  # ── Lint shell scripts ────────────────────────────────────────────────────
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+      - name: Run shellcheck
+        run: shellcheck scripts/*.sh

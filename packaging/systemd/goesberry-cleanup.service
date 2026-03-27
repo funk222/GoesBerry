@@ -1,0 +1,11 @@
+[Unit]
+Description=GoesBerry Daily Cleanup (delete old products & cache)
+Documentation=https://github.com/funk222/GoesBerry
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/goesberry/runtime.env
+ExecStart=/usr/local/bin/goesberry-cleanup.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=goesberry-cleanup

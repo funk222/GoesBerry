@@ -1,0 +1,17 @@
+[Unit]
+Description=GoesBerry – goesrecv (GOES HRIT/GRB SDR demodulator)
+Documentation=https://github.com/pietern/goestools
+After=network.target goesberry-firstboot.service
+Requires=goesberry-firstboot.service
+
+[Service]
+EnvironmentFile=/etc/goesberry/runtime.env
+ExecStart=/usr/local/bin/goesrecv -v -i 1 -c /etc/goesberry/goesrecv.conf
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=goesrecv
+
+[Install]
+WantedBy=multi-user.target

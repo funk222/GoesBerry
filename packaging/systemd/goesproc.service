@@ -1,0 +1,18 @@
+[Unit]
+Description=GoesBerry – goesproc (GOES HRIT product processor)
+Documentation=https://github.com/pietern/goestools
+After=goesrecv.service
+Requires=goesrecv.service
+
+[Service]
+EnvironmentFile=/etc/goesberry/runtime.env
+ExecStart=/usr/local/bin/goesproc -c /etc/goesberry/goesproc.conf \
+    --subscribe tcp://127.0.0.1:5005
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=goesproc
+
+[Install]
+WantedBy=multi-user.target
