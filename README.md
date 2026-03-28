@@ -19,15 +19,29 @@ Plug in an RTL-SDR (+ LNA + SAW filter + dish), flash the card, edit one config 
 
 ---
 
+## Download Links
+
+Use these direct links during setup.
+
+- GoesBerry latest release (image + checksum): https://github.com/funk222/GoesBerry/releases/latest
+- GoesBerry image workflow runs/artifacts: https://github.com/funk222/GoesBerry/actions/workflows/image.yml
+- Raspberry Pi Imager: https://www.raspberrypi.com/software/
+- balenaEtcher: https://etcher.balena.io/
+- Raspberry Pi OS 64-bit downloads: https://www.raspberrypi.com/software/operating-systems/
+- Node.js LTS: https://nodejs.org/en/download
+- goestools upstream (reference): https://github.com/pietern/goestools
+
+---
+
 ## Quick Start
 
 ### 1. Requirements
 
 - Raspberry Pi 5 (4 GB or 8 GB)
-- Raspberry Pi OS 64-bit (Bookworm)
+- Raspberry Pi OS 64-bit (Bookworm): https://www.raspberrypi.com/software/operating-systems/
 - RTL-SDR Blog V3 + GOES-band LNA + SAW filter + dish
 - USB SSD (≥ 512 GB recommended, mounted at `/mnt/goesberry`)
-- Node.js ≥ 18 (`sudo apt install nodejs npm`)
+- Node.js ≥ 18: https://nodejs.org/en/download
 
 ### 2. Install goestools
 
@@ -83,6 +97,9 @@ Use this flow for end-to-end validation on real hardware.
 
 From GitHub Releases (or Actions artifacts), download:
 
+- Releases: https://github.com/funk222/GoesBerry/releases/latest
+- Actions artifacts: https://github.com/funk222/GoesBerry/actions/workflows/image.yml
+
 - `GoesBerry-*.img.xz`
 - `GoesBerry-*.img.xz.sha256`
 
@@ -96,7 +113,10 @@ Compare the printed hash with the value in `.sha256`.
 
 ### 2. Flash SD card
 
-Flash `.img.xz` with Raspberry Pi Imager or balenaEtcher.
+Flash `.img.xz` with:
+
+- Raspberry Pi Imager: https://www.raspberrypi.com/software/
+- balenaEtcher: https://etcher.balena.io/
 
 After flashing, reinsert the SD card and open the `boot` partition.
 
