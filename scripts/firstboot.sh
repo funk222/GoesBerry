@@ -25,7 +25,7 @@ mkdir -p "$ETC_DIR"
 # ── Load user config ──────────────────────────────────────────────────────
 set -a
 # shellcheck source=/boot/goesberry.conf
-source "$CONF_FILE"
+source /boot/goesberry.conf
 set +a
 
 # ── Apply defaults ────────────────────────────────────────────────────────
