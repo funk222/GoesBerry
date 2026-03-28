@@ -1,0 +1,166 @@
+name: Build Pi Image
+
+on:
+  # Build on every push to main (artifact only, no release)
+  push:
+    branches: [main]
+  # Build and publish a Release when a version tag is pushed
+  push:
+    tags: ['v*.*.*']
+  # Allow manual trigger from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-image:
+    name: Build GoesBerry .img.xz
+    runs-on: ubuntu-latest
+    timeout-minutes: 240   # pi-gen can take up to ~2 h on GitHub hosted runners
+
+    permissions:
+      contents: write      # needed to create GitHub Releases
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout GoesBerry
+        uses: actions/checkout@v4
+
+      # ── 2. Build Vue3 frontend ───────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/frontend/package.json
+
+      - name: Build frontend
+        run: |
+          cd web/frontend
+          npm install
+          npm run build
+
+      # ── 3. Pre-install backend node_modules on host ──────────────────────
+      #    (Express & cors are pure JS — safe to install on x86 for ARM64 use)
+      - name: Install backend dependencies
+        run: |
+          cd web/backend
+          npm install --omit=dev --no-audit --no-fund
+
+      # ── 4. Clone pi-gen ──────────────────────────────────────────────────
+      - name: Clone pi-gen
+        run: |
+          git clone --depth=1 https://github.com/RPi-Distro/pi-gen.git /tmp/pi-gen
+
+      # ── 5. Prepare custom stage ──────────────────────────────────────────
+      - name: Populate stage-goesberry files
+        run: |
+          STAGE=/tmp/pi-gen/stage-goesberry/01-goesberry/files
+          mkdir -p "$STAGE/web/frontend" "$STAGE/config" "$STAGE/scripts" "$STAGE/systemd"
+
+          # Backend (with node_modules already installed)
+          cp -r web/backend "$STAGE/web/backend"
+
+          # Frontend (built dist)
+          cp -r web/frontend/dist "$STAGE/web/frontend/dist"
+
+          # Config templates
+          cp -r config/. "$STAGE/config/"
+
+          # Shell scripts
+          cp -r scripts/. "$STAGE/scripts/"
+
+          # systemd units
+          cp -r packaging/systemd/. "$STAGE/systemd/"
+
+      - name: Copy stage-goesberry definition into pi-gen
+        run: |
+          # Copy the stage definition (but NOT the files/ dir — already populated above)
+          cp packaging/pi-gen/stage-goesberry/00-packages \
+             /tmp/pi-gen/stage-goesberry/00-packages
+          cp packaging/pi-gen/stage-goesberry/01-goesberry/00-run.sh \
+             /tmp/pi-gen/stage-goesberry/01-goesberry/00-run.sh
+          cp packaging/pi-gen/stage-goesberry/01-goesberry/00-run-chroot.sh \
+             /tmp/pi-gen/stage-goesberry/01-goesberry/00-run-chroot.sh
+
+      - name: Copy pi-gen config
+        run: cp packaging/pi-gen/config /tmp/pi-gen/config
+
+      - name: Skip intermediate stage images
+        run: |
+          touch /tmp/pi-gen/stage0/SKIP_IMAGES
+          touch /tmp/pi-gen/stage1/SKIP_IMAGES
+          touch /tmp/pi-gen/stage2/SKIP_IMAGES
+          # Only stage-goesberry will produce a .img file
+
+      # ── 6. Build with pi-gen Docker ──────────────────────────────────────
+      - name: Build image (pi-gen Docker)
+        run: |
+          cd /tmp/pi-gen
+          sudo bash build-docker.sh
+        env:
+          # Reduce image build log noise
+          VERBOSE: "0"
+
+      # ── 7. Compress & checksum ───────────────────────────────────────────
+      - name: Compress image
+        run: |
+          IMAGE=$(find /tmp/pi-gen/deploy -name "*.img" | head -1)
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          xz --threads=0 --best "$IMAGE"
+          sha256sum "${IMAGE}.xz" > "${IMAGE}.xz.sha256"
+          ls -lh /tmp/pi-gen/deploy/
+
+      # ── 8. Upload artifact (every build) ─────────────────────────────────
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoesBerry-image-${{ github.sha }}
+          path: |
+            /tmp/pi-gen/deploy/*.img.xz
+            /tmp/pi-gen/deploy/*.sha256
+          retention-days: 30
+
+      # ── 9. Create GitHub Release (tag pushes only) ────────────────────────
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            /tmp/pi-gen/deploy/*.img.xz
+            /tmp/pi-gen/deploy/*.sha256
+          body: |
+            ## GoesBerry ${{ github.ref_name }}
+
+            ### Flash instructions
+            1. Download the `.img.xz` file below.
+            2. Flash to a microSD card (≥16 GB) with [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+            3. Re-mount the boot partition and edit `goesberry.conf`:
+
+            ```bash
+            # Minimum required fields:
+            CENTER_FREQUENCY_HZ=1694100000
+            SAMPLE_RATE=2400000
+            RTL_PPM=0
+            RTL_GAIN=40
+            DATA_ROOT=/mnt/goesberry   # path to your SSD mount point
+            WEB_PORT=8080
+            RETENTION_DAYS=14
+            ```
+
+            4. Insert SD card + RTL-SDR + SSD → power on.
+            5. On **first boot**, goestools is compiled automatically (~30 min on Pi 5).
+               Follow progress: `journalctl -fu goesberry-install-tools`
+            6. Once complete, open `http://<pi-ip>:8080` in your browser.
+
+            ### Default credentials
+            | | |
+            |---|---|
+            | Username | `pi` |
+            | Password | `goesberry` |
+            | SSH | enabled |
+
+            **Change the password after first login!**
+
+            ### Verify checksum
+            ```bash
+            sha256sum -c GoesBerry-*.img.xz.sha256
+            ```

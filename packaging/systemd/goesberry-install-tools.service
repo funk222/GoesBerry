@@ -1,0 +1,23 @@
+[Unit]
+Description=GoesBerry – Build & install goestools on first boot
+Documentation=https://github.com/funk222/GoesBerry
+# Only run when goesrecv binary is absent (skips on all subsequent boots)
+ConditionPathExists=!/usr/local/bin/goesrecv
+After=network-online.target goesberry-firstboot.service
+Wants=network-online.target
+Requires=goesberry-firstboot.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/goesberry-install-goestools.sh
+# Once built, start the receiver pipeline immediately
+ExecStartPost=/usr/bin/systemctl enable --now goesrecv.service
+ExecStartPost=/usr/bin/systemctl enable --now goesproc.service
+TimeoutStartSec=3600
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=goesberry-install-tools
+
+[Install]
+WantedBy=multi-user.target

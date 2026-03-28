@@ -1,7 +1,8 @@
 [Unit]
 Description=GoesBerry – goesproc (GOES HRIT product processor)
 Documentation=https://github.com/pietern/goestools
-After=goesrecv.service
+ConditionPathExists=/usr/local/bin/goesproc
+After=goesrecv.service goesberry-install-tools.service
 Requires=goesrecv.service
 
 [Service]

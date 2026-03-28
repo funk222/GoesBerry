@@ -1,0 +1,32 @@
+# ============================================================
+#  pi-gen configuration for GoesBerry image build
+#  Used by: packaging/build-image.sh and GitHub Actions
+# ============================================================
+
+IMG_NAME="GoesBerry"
+TARGET_HOSTNAME="goesberry"
+
+# SSH enabled by default so the user can log in headlessly
+ENABLE_SSH=1
+
+# Default locale / keyboard / timezone
+# Users can reconfigure with raspi-config after first boot
+LOCALE_DEFAULT="en_US.UTF-8"
+KEYBOARD_KEYMAP="us"
+KEYBOARD_LAYOUT="English (US)"
+TIMEZONE_DEFAULT="UTC"
+
+# Default login: pi / goesberry
+# Change the password after first boot!
+FIRST_USER_NAME="pi"
+FIRST_USER_PASS="goesberry"
+DISABLE_FIRST_BOOT_USER_RENAME=1
+
+# WiFi (leave blank; configure via /etc/wpa_supplicant/wpa_supplicant.conf
+# or raspi-config after first boot)
+WPA_ESSID=""
+WPA_PASSWORD=""
+WPA_COUNTRY=""
+
+# Only build stages we need (Lite base + our custom stage)
+STAGE_LIST="stage0 stage1 stage2 stage-goesberry"

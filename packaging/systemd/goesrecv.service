@@ -1,7 +1,9 @@
 [Unit]
 Description=GoesBerry – goesrecv (GOES HRIT/GRB SDR demodulator)
 Documentation=https://github.com/pietern/goestools
-After=network.target goesberry-firstboot.service
+# Skip if goestools not yet installed (install-tools service handles first-boot build)
+ConditionPathExists=/usr/local/bin/goesrecv
+After=network.target goesberry-firstboot.service goesberry-install-tools.service
 Requires=goesberry-firstboot.service
 
 [Service]
