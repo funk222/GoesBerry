@@ -23,8 +23,8 @@ fi
 mkdir -p "$ETC_DIR"
 
 # ── Load user config ──────────────────────────────────────────────────────
-# shellcheck disable=SC1090
 set -a
+# shellcheck source=/boot/goesberry.conf
 source "$CONF_FILE"
 set +a
 
