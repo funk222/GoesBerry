@@ -75,6 +75,94 @@ The `goesberry-firstboot` service runs once, generates all configs, then starts 
 
 ---
 
+## SD Card Experiment Workflow
+
+Use this flow for end-to-end validation on real hardware.
+
+### 1. Download and verify image
+
+From GitHub Releases (or Actions artifacts), download:
+
+- `GoesBerry-*.img.xz`
+- `GoesBerry-*.img.xz.sha256`
+
+Verify checksum on Windows:
+
+```powershell
+certutil -hashfile .\GoesBerry-xxx.img.xz SHA256
+```
+
+Compare the printed hash with the value in `.sha256`.
+
+### 2. Flash SD card
+
+Flash `.img.xz` with Raspberry Pi Imager or balenaEtcher.
+
+After flashing, reinsert the SD card and open the `boot` partition.
+
+### 3. Edit `/boot/goesberry.conf`
+
+Minimum settings:
+
+```bash
+CENTER_FREQUENCY_HZ=1694100000
+SAMPLE_RATE=2400000
+RTL_PPM=0
+RTL_GAIN=40
+DATA_ROOT=/mnt/goesberry
+WEB_PORT=8080
+RETENTION_DAYS=14
+```
+
+If SSD mount is not ready yet, use temporary test path:
+
+```bash
+DATA_ROOT=/home/pi/goesberry-test
+```
+
+### 4. Power on and wait for first boot setup
+
+Connect SD card + RTL-SDR + LNA/SAW + antenna + SSD, then boot Pi 5.
+
+First boot behavior:
+
+1. `goesberry-firstboot` generates `/etc/goesberry/*`
+2. `goesberry-install-tools` compiles goestools (~20–40 min on Pi 5)
+3. `goesrecv` and `goesproc` auto-start after build completes
+4. Web UI serves on port `8080`
+
+### 5. Validate from SSH
+
+```bash
+hostname -I
+systemctl status goesberry-firstboot --no-pager
+systemctl status goesberry-install-tools --no-pager
+journalctl -fu goesberry-install-tools
+systemctl status goesberry-web --no-pager
+curl http://127.0.0.1:8080/api/health
+curl http://127.0.0.1:8080/api/satellites
+```
+
+### 6. Acceptance checklist
+
+- `goesberry-firstboot` is `active (exited)`
+- `goesberry-install-tools` completed successfully
+- `goesrecv` and `goesproc` are `active (running)`
+- `http://<pi-ip>:8080` opens
+- `/api/health` returns `ok: true`
+- Imagery appears in latest/history once signal lock is achieved
+
+### 7. Troubleshooting commands
+
+```bash
+journalctl -u goesberry-install-tools -n 200 --no-pager
+journalctl -u goesrecv -n 200 --no-pager
+journalctl -u goesproc -n 200 --no-pager
+journalctl -u goesberry-web -n 200 --no-pager
+```
+
+---
+
 ## Repository Layout
 
 ```
